@@ -35,7 +35,7 @@ public class UpdateTaskDto
 
 public class TaskResponseDto
 {
-    public string Id { get; set; }
+    public int Id { get; set; }
     public string Title { get; set; }
     public string? Description { get; set; }
     public TodoTaskStatus Status { get; set; }
@@ -47,7 +47,7 @@ public class TaskResponseDto
 
 public class UserDto
 {
-    public string Id { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; }
     public string Email { get; set; }
 }

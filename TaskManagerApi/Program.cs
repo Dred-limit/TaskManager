@@ -1,6 +1,7 @@
 using TaskManagerApi.Data;
 using TaskManagerApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,10 +44,22 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapGet("/tasks", async (AppDbContext db) =>
+app.MapGet("/tasks", async (
+    AppDbContext db,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10) =>
 {
-    var tasks = await db.Tasks
-        .AsNoTracking()
+    if (page < 1) page = 1;
+    if (pageSize < 1 || pageSize > 50) pageSize = 10;
+
+    var query = db.Tasks.AsNoTracking();
+
+    var totalCount = await query.CountAsync();
+
+    var tasks = await query
+        .OrderBy(task => task.Id)
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
         .Select(task => new
         {
             task.Id,
@@ -54,8 +67,20 @@ app.MapGet("/tasks", async (AppDbContext db) =>
             task.CreatedDate,
             task.Status,
         }).ToListAsync();
+    
+    var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-    return tasks;
+    return Results.Ok(new
+    {
+        Data = tasks,
+        Pagination = new
+        {
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages
+        }
+    });
 });
 
 app.MapGet("/tasks/{id}", async (int id, AppDbContext db) =>
@@ -125,6 +150,8 @@ app.MapPost("/tasks", async (TodoTask newTask, AppDbContext db) =>
 
     try
     {
+        await db.SaveChangesAsync();
+
         return Results.Created($"/tasks/{newTask.Id}", new
         {
             newTask.Id,
