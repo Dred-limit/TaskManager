@@ -28,8 +28,8 @@
 ## 🛠️ Запуск проекта
 
 ### Предварительные требования
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- IDE (Visual Studio 2022, VS Code или Rider)
+- [.NET 8 SDK]
+- IDE (Visual Studio 2026, VS Code)
 
 ### Локальный запуск
 ```bash
